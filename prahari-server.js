@@ -46,7 +46,7 @@ app.use(helmet({
       styleSrc:   ["'self'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc:    ["'self'", "https://fonts.gstatic.com"],
       imgSrc:     ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
-      connectSrc: ["'self'", "https://api.prahari.in", "http://localhost:*", "https://*.prahari.in"],
+      connectSrc: ["'self'", "https://api.prahari.in", "http://localhost:*", "https://*.prahari.in", "https://*.vercel.app"],
     },
   },
   hsts:            { maxAge: 63072000, includeSubDomains: true, preload: true },
@@ -623,6 +623,10 @@ const healthHandler = async (req, res) => {
     res.status(503).json({ status:"error", db:"disconnected" });
   }
 };
+// API root (production: avoid 404 when hitting /api)
+app.get("/api", (req, res) => {
+  res.json({ name: "Prahari API", version: "1.0", health: "/api/health", docs: "Prahari — Citizen Guardian Network" });
+});
 app.get("/health", healthHandler);
 app.get("/api/health", healthHandler);
 

@@ -78,4 +78,16 @@ If `/api/health` shows `"db":"disconnected"`, check that `DATABASE_URL` on Verce
 - **Deploy:** Redeploy so the new env vars are used.
 - **Live URL:** Use the Vercel project URL (e.g. `https://prahari-theta.vercel.app`).
 
-Your app is production-ready: Helmet, CORS, rate limiting, JWT auth, and Supabase SSL are configured. Once the env vars are set and you redeploy, the app is live.
+Your app is production-ready: Helmet, CORS, rate limiting, JWT auth, Supabase SSL, and a hardened Vercel serverless handler are configured. Once the env vars are set and you redeploy, the app is live.
+
+---
+
+## Live URL
+
+After deploy, your app will be at a URL like **https://prahari-theta.vercel.app**. Verify:
+
+- **https://prahari-theta.vercel.app** — loads the app (Prahari — Citizen Guardian Network).
+- **https://prahari-theta.vercel.app/api/health** — returns `{"status":"ok","db":"connected",...}` when `DATABASE_URL` and DB are correct.
+- **https://prahari-theta.vercel.app/api** — returns `{"name":"Prahari API","version":"1.0",...}`.
+
+If `/api/health` shows `"db":"disconnected"`, set or fix `DATABASE_URL` in Vercel (and `JWT_SECRET`), then redeploy.

@@ -5,5 +5,11 @@
     { "source": "/health", "destination": "/api?path=health" },
     { "source": "/", "destination": "/index.html" },
     { "source": "/index.html", "destination": "/index.html" }
-  ]
+  ],
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
 }

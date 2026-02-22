@@ -24,11 +24,9 @@ const validator    = require("validator");
 require("dotenv").config();
 
 // ─── DB CONNECTION ─────────────────────────────────────────────────────────
-const dbUrl = process.env.DATABASE_URL || "";
-const useSSL = /sslmode=require|supabase|neon|railway|render\.com/i.test(dbUrl) || process.env.NODE_ENV === "production";
 const db = new Pool({
-  connectionString: dbUrl,
-  ssl: useSSL ? { rejectUnauthorized: false } : false,
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -42,11 +40,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc:  ["'self'", "https://cdnjs.cloudflare.com"],
-      styleSrc:   ["'self'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+      scriptSrc:  ["'self'"],
+      styleSrc:   ["'self'", "https://fonts.googleapis.com"],
       fontSrc:    ["'self'", "https://fonts.gstatic.com"],
-      imgSrc:     ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
-      connectSrc: ["'self'", "https://api.prahari.in", "http://localhost:*", "https://*.prahari.in"],
+      imgSrc:     ["'self'", "data:", "https://res.cloudinary.com"],
+      connectSrc: ["'self'"],
     },
   },
   hsts:            { maxAge: 63072000, includeSubDomains: true, preload: true },
@@ -57,7 +55,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin:      process.env.FRONTEND_URL || true,
+  origin:      process.env.FRONTEND_URL || "https://prahari.in",
   credentials: true,
   methods:     ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization","X-CSRF-Token","X-Request-ID"],
@@ -120,7 +118,7 @@ const authenticate = async (req, res, next) => {
     
     // Check token not revoked (store revoked tokens in Redis/DB in production)
     const user = await db.query(
-      "SELECT id, name, phone, email, pts, reports, rank, badge, title, city, is_phone_verified AS verified, is_banned FROM users WHERE id = $1",
+      "SELECT id, name, phone, email, pts, reports, rank, badge, title, city, verified, is_banned FROM users WHERE id = $1",
       [payload.sub]
     );
     if (!user.rows[0]) return res.status(401).json({ error: "User not found" });
@@ -215,7 +213,7 @@ app.post("/api/auth/login", authLimiter, async (req, res) => {
 
     const cleanPhone = phone.replace(/\s/g,"");
     const result = await db.query(
-      "SELECT id, name, phone, password_hash, pts, reports, rank, badge, title, city, is_phone_verified AS verified, is_banned FROM users WHERE phone = $1",
+      "SELECT id, name, phone, password_hash, pts, reports, rank, badge, title, city, verified, is_banned FROM users WHERE phone = $1",
       [cleanPhone]
     );
 
@@ -460,8 +458,8 @@ app.get("/api/leaderboard", async (req, res) => {
              COUNT(CASE WHEN r.status = 'resolved' THEN 1 END) as resolved,
              RANK() OVER (ORDER BY u.pts DESC) as rank
       FROM users u
-      LEFT JOIN reports r ON r.user_id = u.id AND r.is_deleted = false ${dateFilter}
-      WHERE 1=1 ${city ? "AND u.city ILIKE $1" : ""}
+      LEFT JOIN reports r ON r.user_id = u.id ${dateFilter}
+      ${city ? "WHERE u.city ILIKE $1" : ""}
       GROUP BY u.id
       ORDER BY u.pts DESC
       LIMIT 100
@@ -481,7 +479,7 @@ app.get("/api/stats/national", async (req, res) => {
         COUNT(*) as total_reports,
         COUNT(CASE WHEN status = 'resolved' THEN 1 END) as resolved,
         COUNT(DISTINCT user_id) as active_users,
-        COALESCE(SUM(pts_awarded), 0) as total_pts_given
+        SUM(pts_awarded) as total_pts_given
       FROM reports WHERE is_deleted = false
     `);
     res.json(stats.rows[0]);
@@ -490,60 +488,34 @@ app.get("/api/stats/national", async (req, res) => {
   }
 });
 
-app.get("/api/stats/cities", async (req, res) => {
-  try {
-    const cities = await db.query(`
-      SELECT city,
-             COUNT(*) as reports,
-             COUNT(CASE WHEN status = 'resolved' THEN 1 END) as resolved,
-             ROUND(100.0 * COUNT(CASE WHEN status = 'resolved' THEN 1 END) / NULLIF(COUNT(*), 0))::int as pct
-      FROM reports
-      WHERE is_deleted = false AND city IS NOT NULL AND city != ''
-      GROUP BY city
-      ORDER BY reports DESC
-      LIMIT 50
-    `);
-    res.json({ cities: cities.rows });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch city stats" });
-  }
-});
-
 // ─── ROUTES: REWARDS ────────────────────────────────────────────────────────
-// GET /api/rewards/catalog
-app.get("/api/rewards/catalog", async (req, res) => {
-  try {
-    const r = await db.query(
-      "SELECT id, label, pts_required as pts, category, partner, icon FROM reward_catalog WHERE is_active = true ORDER BY pts_required ASC"
-    );
-    res.json({ rewards: r.rows });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch rewards" });
-  }
-});
-
 app.post("/api/rewards/redeem", authenticate, async (req, res) => {
   try {
     const { rewardId } = req.body;
-    const catalog = await db.query(
-      "SELECT id, label, pts_required FROM reward_catalog WHERE id = $1 AND is_active = true",
-      [rewardId]
-    );
-    const reward = catalog.rows[0];
-    if (!reward) return res.status(400).json({ error: "Invalid reward" });
-    const pts = reward.pts_required;
-    if (req.user.pts < pts) return res.status(400).json({ error: "Insufficient points" });
+    const rewards = {
+      r1:{pts:100,label:"₹10 UPI Cashback"},r2:{pts:300,label:"Metro Rides x3"},
+      r3:{pts:500,label:"₹50 UPI Cashback"},r4:{pts:1000,label:"1 Month Bus Pass"},
+      r5:{pts:2000,label:"₹200 Grocery Voucher"},r7:{pts:5000,label:"IT Rebate Cert"},
+    };
 
+    const reward = rewards[rewardId];
+    if (!reward) return res.status(400).json({ error: "Invalid reward" });
+    if (req.user.pts < reward.pts) return res.status(400).json({ error: "Insufficient points" });
+
+    // Deduct points atomically
     const result = await db.query(
       "UPDATE users SET pts = pts - $1 WHERE id = $2 AND pts >= $1 RETURNING pts",
-      [pts, req.user.id]
+      [reward.pts, req.user.id]
     );
     if (!result.rows[0]) return res.status(400).json({ error: "Insufficient points" });
 
+    // Log redemption
     await db.query(
       "INSERT INTO redemptions (user_id, reward_id, pts_spent, created_at) VALUES ($1, $2, $3, NOW())",
-      [req.user.id, rewardId, pts]
+      [req.user.id, rewardId, reward.pts]
     );
+
+    // In production: trigger actual reward fulfillment (UPI payout, voucher email, etc.)
 
     res.json({ message: `${reward.label} redeemed!`, remainingPts: result.rows[0].pts });
   } catch (err) {
@@ -615,27 +587,14 @@ async function checkSLAViolations() {
 setInterval(checkSLAViolations, 60 * 60 * 1000);
 
 // ─── HEALTH CHECK ────────────────────────────────────────────────────────────
-const healthHandler = async (req, res) => {
+app.get("/health", async (req, res) => {
   try {
     await db.query("SELECT 1");
     res.json({ status:"ok", db:"connected", ts: new Date().toISOString() });
   } catch {
     res.status(503).json({ status:"error", db:"disconnected" });
   }
-};
-app.get("/health", healthHandler);
-app.get("/api/health", healthHandler);
-
-// ─── STATIC APP (skip on Vercel — Vercel serves static from root) ─────────────
-if (!process.env.VERCEL) {
-  const fs = require("fs");
-  app.use(express.static(__dirname, { index: false }));
-  app.get(["/", "/index.html"], (req, res) => {
-    const index = path.join(__dirname, "index.html");
-    const appFile = path.join(__dirname, "prahari-app.html");
-    res.sendFile(fs.existsSync(index) ? index : appFile);
-  });
-}
+});
 
 // ─── ERROR HANDLERS ──────────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
@@ -647,12 +606,11 @@ app.use((err, req, res, next) => {
 
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
-// ─── START (only when run directly; on Vercel the app is required by api handler) ─
+// ─── START ───────────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`✅ Prahari API running on port ${PORT}`);
+  console.log(`🔒 Security: Helmet, CORS, Rate Limiting, JWT enabled`);
+});
+
 module.exports = app;
-if (require.main === module) {
-  const PORT = process.env.PORT || 3001;
-  app.listen(PORT, () => {
-    console.log(`✅ Prahari API running on port ${PORT}`);
-    console.log(`🔒 Security: Helmet, CORS, Rate Limiting, JWT enabled`);
-  });
-}

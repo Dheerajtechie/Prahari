@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <meta name="theme-color" content="#FF6B00" />
-  <meta name="description" content="Prahari — India's accountability layer. Report corruption & civic issues in 60 sec. AI verifies, blockchain locks it, rewards follow. If they ignore, we file RTI." />
-  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#020817" />
+  <meta name="description" content="Prahari — India's citizen accountability platform. Report corruption, waste and civic issues. Earn rewards. Drive real change." />
   <meta name="keywords" content="prahari, corruption report india, civic app, jan seva, report corruption, citizen platform" />
   <meta property="og:title" content="Prahari — Citizen Guardian Network" />
-  <meta property="og:description" content="Report in 60 sec. AI verifies. Govt gets a deadline. You earn rewards. We make inaction expensive." />
+  <meta property="og:description" content="Report. Verify. Reward. Reform India." />
   <meta property="og:type" content="website" />
   <title>Prahari — Citizen Guardian Network 🇮🇳</title>
 
@@ -198,8 +197,7 @@
 const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
-// Same-origin when empty (app and API on same host). Set window.PRAHARI_API_URL for separate API.
-const API_BASE = (typeof window !== "undefined" && (window.PRAHARI_API_URL || "")) ? String(window.PRAHARI_API_URL).replace(/\/$/, "") : "";
+const API_URL = window.PRAHARI_API_URL || "https://api.prahari.in/v1"; // set your backend URL
 
 const CATEGORIES = [
   { id:"corruption",  label:"Corruption",    icon:"⚖️",  pts:500, color:"#EF4444", severity:"CRITICAL", dept:"Vigilance Bureau",    sla:7,  desc:"Bribery, misuse of power, govt fraud" },
@@ -277,7 +275,7 @@ const Security = {
   csrfToken: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
 };
 
-// ─── STORAGE ──────────────────────────────────────────────────────────────────
+// ─── STORAGE (Production: replace with real API calls) ───────────────────────
 const Store = {
   get: (key, def=null) => {
     try { const v = localStorage.getItem(`prahari_${key}`); return v ? JSON.parse(v) : def; }
@@ -289,41 +287,6 @@ const Store = {
   },
   del: (key) => { try { localStorage.removeItem(`prahari_${key}`); } catch {} },
 };
-
-// ─── API (production-ready: auth header, 401 → logout) ───────────────────────
-async function api(path, options = {}) {
-  const url = API_BASE + path;
-  const headers = { ...(options.headers || {}) };
-  if (!headers["Content-Type"] && options.body && typeof options.body === "string") headers["Content-Type"] = "application/json";
-  const token = Store.get("token");
-  if (token) headers["Authorization"] = "Bearer " + token;
-  const res = await fetch(url, { ...options, headers });
-  if (res.status === 401) {
-    Store.del("user"); Store.del("token");
-    window.location.reload();
-    throw new Error("Session expired");
-  }
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const data = isJson ? await res.json().catch(() => ({})) : null;
-  if (!res.ok) throw new Error(data?.error || data?.errors?.[0] || res.statusText || "Request failed");
-  return data;
-}
-
-async function apiForm(path, formData, options = {}) {
-  const url = API_BASE + path;
-  const headers = { ...(options.headers || {}) };
-  const token = Store.get("token");
-  if (token) headers["Authorization"] = "Bearer " + token;
-  const res = await fetch(url, { ...options, method: options.method || "POST", body: formData, headers });
-  if (res.status === 401) {
-    Store.del("user"); Store.del("token");
-    window.location.reload();
-    throw new Error("Session expired");
-  }
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error || res.statusText || "Request failed");
-  return data;
-}
 
 // ─── AUTH CONTEXT ─────────────────────────────────────────────────────────────
 const AuthCtx = createContext(null);
@@ -405,10 +368,10 @@ function AppInner() {
 function Onboarding({ onDone }) {
   const [step, setStep] = useState(0);
   const slides = [
-    { icon:"🇮🇳", title:"India's Accountability Layer", body:"We don't fight the system—we make inaction more expensive than action. One report, one deadline, one outcome.", color:"#FF6B00" },
-    { icon:"📱", title:"Report in 60 Seconds", body:"Photo, location, category. AI verifies. A formal notice goes to the right department with a legal SLA. Ignored? We auto-file RTI.", color:"#0EA5E9" },
-    { icon:"🔒", title:"They Can't Delete It", body:"Every report is hashed on blockchain. Tamper-proof. If officials ignore the deadline, we escalate to District Collector and media. Your report stays.", color:"#8B5CF6" },
-    { icon:"⭐", title:"Doing Good Pays", body:"UPI cashback, metro rides, govt certificates. Verified reports earn points. Top guardians can earn a share of corruption amounts recovered.", color:"#F59E0B" },
+    { icon:"🇮🇳", title:"India's Accountability Revolution", body:"1.4 billion eyes watching. Zero tolerance for corruption, waste, and broken systems.", color:"#FF6B00" },
+    { icon:"📱", title:"Report in 60 Seconds", body:"Spot an issue, take a photo, pinpoint the location. Our AI verifies it and sends a formal legal notice to the responsible department.", color:"#0EA5E9" },
+    { icon:"🔒", title:"Tamper-Proof Records", body:"Every report is hashed on blockchain. The government cannot delete or alter it. If they ignore it, we auto-file an RTI application on your behalf.", color:"#8B5CF6" },
+    { icon:"⭐", title:"Doing Good Pays", body:"Earn real rewards — UPI cashback, bus passes, government certificates. Top reporters can earn a percentage of corruption amounts recovered.", color:"#F59E0B" },
   ];
   const s = slides[step];
 
@@ -474,21 +437,32 @@ function AuthScreen({ onAuth }) {
       toast("Too many attempts. Please wait a minute.", "error"); return;
     }
     setLoading(true);
-    try {
-      const body = mode === "register"
-        ? { name: form.name.trim(), phone: form.phone.replace(/\s/g,""), password: form.password }
-        : { phone: form.phone.replace(/\s/g,""), password: form.password };
-      const endpoint = mode === "register" ? "/api/auth/register" : "/api/auth/login";
-      const data = await api(endpoint, { method: "POST", body: JSON.stringify(body) });
-      const u = { ...data.user, loginAt: Date.now() };
-      login(u, data.token);
-      toast("Welcome to Prahari 🇮🇳", "success");
-      onAuth();
-    } catch (err) {
-      toast(err.message || "Login failed", "error");
-    } finally {
-      setLoading(false);
-    }
+
+    // In production: replace with real API call to your backend
+    // const res = await fetch(`${API_URL}/auth/${mode}`, { method:"POST", headers:{"Content-Type":"application/json","X-CSRF-Token":Security.csrfToken}, body: JSON.stringify(form) });
+    
+    // Demo: simulate auth
+    await new Promise(r => setTimeout(r, 1200));
+    
+    const mockUser = {
+      id: "U" + Date.now(),
+      name: form.name || "Prahari User",
+      phone: form.phone,
+      pts: 0,
+      reports: 0,
+      streak: 0,
+      rank: 284,
+      badge: "⚔️",
+      title: "TRUTH WARRIOR",
+      city: "",
+      verified: false,
+      joinDate: new Date().toISOString(),
+    };
+    
+    login(mockUser, "demo_token_" + Date.now());
+    toast("Welcome to Prahari 🇮🇳", "success");
+    setLoading(false);
+    onAuth();
   };
 
   return (
@@ -564,13 +538,7 @@ function MainApp() {
   const [reportModal, setReportModal] = useState(false);
 
   useEffect(() => {
-    api("/api/stats/national").then(s => {
-      const n = parseInt(s.total_reports, 10);
-      if (!isNaN(n)) setLiveCount(n);
-    }).catch(() => {});
-  }, []);
-  useEffect(() => {
-    const t = setInterval(() => setLiveCount(p => p + Math.floor(Math.random() * 3)), 7000);
+    const t = setInterval(() => setLiveCount(p => p + Math.floor(Math.random()*3)), 7000);
     return () => clearInterval(t);
   }, []);
 
@@ -644,42 +612,8 @@ function TopBar({ liveCount }) {
 // ═══════════════════════════════════════════════════════════════════════════
 // HOME TAB
 // ═══════════════════════════════════════════════════════════════════════════
-function formatTimeAgo(iso) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const sec = Math.floor((Date.now() - d.getTime()) / 1000);
-  if (sec < 60) return "just now";
-  if (sec < 3600) return Math.floor(sec/60) + "m ago";
-  if (sec < 86400) return Math.floor(sec/3600) + "h ago";
-  return Math.floor(sec/86400) + "d ago";
-}
-
 function HomeTab({ setReportModal, liveCount }) {
   const { user } = useContext(AuthCtx);
-  const [liveReports, setLiveReports] = useState([]);
-  const [feedLoaded, setFeedLoaded] = useState(false);
-
-  useEffect(() => {
-    api("/api/reports?limit=20").then(data => {
-      const list = (data.reports || []).map(r => ({
-        id: r.id,
-        cat: r.category,
-        title: r.title,
-        city: r.city,
-        status: r.status,
-        pts: r.pts_awarded || 0,
-        time: formatTimeAgo(r.created_at),
-        votes: r.votes || 0,
-        impact: r.impact_note,
-        user: r.reporter_name || "Anonymous",
-        verified: (r.ai_score || 0) >= 70,
-      }));
-      setLiveReports(list);
-      setFeedLoaded(true);
-    }).catch(() => setFeedLoaded(true));
-  }, []);
-
-  const feed = liveReports.length > 0 ? liveReports : LIVE_FEED;
   return (
     <div>
       {/* Hero */}
@@ -689,15 +623,15 @@ function HomeTab({ setReportModal, liveCount }) {
         
         <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
           <div className="pulse-dot" style={{ width:7, height:7, background:"var(--green)", borderRadius:"50%" }} />
-          <span style={{ fontSize:11, color:"var(--green)", fontWeight:700, letterSpacing:"1px" }}>{liveCount.toLocaleString()} REPORTS FILED</span>
+          <span style={{ fontSize:11, color:"var(--green)", fontWeight:700, letterSpacing:"1px" }}>{liveCount.toLocaleString()} REPORTS FILED TODAY</span>
         </div>
 
         <h1 style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:32, lineHeight:1.1, color:"var(--white)", marginBottom:12, letterSpacing:"-1px" }}>
-          We make inaction<br />
-          <span style={{ background:"linear-gradient(90deg,#FF6B00,#FF9240)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>more expensive.</span>
+          Every report is<br />
+          <span style={{ background:"linear-gradient(90deg,#FF6B00,#FF9240)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>a revolution.</span>
         </h1>
         <p style={{ color:"var(--sub)", fontSize:14, lineHeight:1.7, marginBottom:22, maxWidth:340 }}>
-          Report in 60 seconds. AI verifies. Govt gets a deadline. You earn rewards. If they ignore—we file RTI. India's accountability layer.
+          India's first AI-powered civic accountability platform. Report corruption, waste, and broken systems — earn rewards — watch them get fixed.
         </p>
 
         <button className="btn-primary glow-btn" onClick={() => setReportModal(true)} style={{ marginBottom:20 }}>
@@ -745,11 +679,11 @@ function HomeTab({ setReportModal, liveCount }) {
 
       {/* Live Feed */}
       <Section title="Live Reports" sub="Real-time from across India">
-        {feed.map(r => <ReportCard key={r.id} r={r} />)}
+        {LIVE_FEED.map(r => <ReportCard key={r.id} r={r} />)}
       </Section>
 
       {/* Unique Features */}
-      <Section title="Why We Win" sub="Moats no other platform has">
+      <Section title="Why Prahari is Different" sub="Features no other platform has">
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
           {[
             { icon:"🔒", title:"Blockchain Records",   desc:"Reports are permanent and tamper-proof. Govt cannot delete them." },
@@ -815,28 +749,28 @@ function ReportModal({ onClose, onDone }) {
 
   const submit = async () => {
     setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("category", cat);
-      formData.append("title", Security.sanitize(form.title));
-      formData.append("desc", Security.sanitize(form.desc));
-      formData.append("location", Security.sanitize(form.location));
-      formData.append("city", Security.sanitize(form.city));
-      formData.append("is_anonymous", form.anon ? "true" : "false");
-      formData.append("is_urgent", form.urgent ? "true" : "false");
-      if (form.evidence && form.evidence instanceof File) formData.append("evidence", form.evidence);
+    await new Promise(r => setTimeout(r, 1200));
+    
+    // Save to local store
+    const reports = Store.get("myReports", []);
+    const newReport = {
+      id: "R" + Date.now(),
+      cat, title: Security.sanitize(form.title),
+      desc: Security.sanitize(form.desc),
+      location: Security.sanitize(form.location),
+      city: Security.sanitize(form.city),
+      anon: form.anon, urgent: form.urgent,
+      status:"pending", pts:0,
+      time: new Date().toISOString(),
+      aiScore: aiResult?.credibility,
+    };
+    Store.set("myReports", [newReport, ...reports]);
+    updateUser({ pts: (user?.pts||0) + 50, reports: (user?.reports||0) + 1 }); // +50 pts for filing
 
-      const data = await apiForm("/api/reports", formData);
-      const ptsAdded = data.ptsAwarded != null ? data.ptsAwarded : 50;
-      updateUser({ pts: (user?.pts||0) + ptsAdded, reports: (user?.reports||0) + 1 });
-      setDone(true);
-      toast("Report submitted! You'll earn points once verified ✅", "success");
-      setTimeout(onDone, 3500);
-    } catch (err) {
-      toast(err.message || "Submit failed", "error");
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false);
+    setDone(true);
+    toast("Report submitted! You'll earn points once verified ✅", "success");
+    setTimeout(onDone, 3500);
   };
 
   if (done) return (
@@ -1006,16 +940,6 @@ function ReportModal({ onClose, onDone }) {
 // ═══════════════════════════════════════════════════════════════════════════
 function ImpactTab() {
   const [view, setView] = useState("cities");
-  const [cityStats, setCityStats] = useState(CITY_STATS);
-  const [leaderboard, setLeaderboard] = useState(LEADERBOARD);
-
-  useEffect(() => {
-    api("/api/stats/cities").then(d => d.cities?.length && setCityStats(d.cities.map((c,i) => ({ city: c.city, reports: c.reports, resolved: c.resolved, pct: c.pct || 0 }))))).catch(() => {});
-    api("/api/leaderboard").then(d => {
-      if (d.leaderboard?.length) setLeaderboard(d.leaderboard.map((u,i) => ({ rank: i+1, name: u.name, city: u.city, pts: u.pts, reports: u.total_reports, resolved: u.resolved, badge: u.badge || "⚔️", title: u.title || "TRUTH WARRIOR" })));
-    }).catch(() => {});
-  }, []);
-
   return (
     <div style={{ padding:"18px 18px 0" }}>
       <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:26, color:"var(--white)", marginBottom:4 }}>National Impact</div>
@@ -1038,7 +962,7 @@ function ImpactTab() {
 
       {view==="cities" && (
         <div>
-          {cityStats.map((c,i) => (
+          {CITY_STATS.map((c,i) => (
             <div key={c.city} className="card" style={{ marginBottom:10 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
                 <div style={{ display:"flex", gap:10, alignItems:"center" }}>
@@ -1094,7 +1018,7 @@ function ImpactTab() {
         <div>
           {/* Podium */}
           <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"center", gap:12, marginBottom:24, height:160 }}>
-            {[leaderboard[1],leaderboard[0],leaderboard[2]].filter(Boolean).map((l,i) => {
+            {[LEADERBOARD[1],LEADERBOARD[0],LEADERBOARD[2]].map((l,i) => {
               const hs=[100,145,80], cols=["var(--sub)","var(--saffron)","var(--gold)"];
               return (
                 <div key={l.rank} style={{ flex:1, textAlign:"center" }}>
@@ -1105,7 +1029,7 @@ function ImpactTab() {
               );
             })}
           </div>
-          {leaderboard.map(l => (
+          {LEADERBOARD.map(l => (
             <div key={l.rank} className="card" style={{ marginBottom:10, display:"flex", alignItems:"center", gap:12, border: l.rank===1 ? "1px solid rgba(255,107,0,.4)" : "1px solid var(--border)" }}>
               <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:24, width:32, textAlign:"center" }}>{l.badge}</div>
               <div style={{ flex:1 }}>
@@ -1129,26 +1053,16 @@ function ImpactTab() {
 // REWARDS TAB
 // ═══════════════════════════════════════════════════════════════════════════
 function RewardsTab() {
-  const { user, updateUser } = useContext(AuthCtx);
+  const { user } = useContext(AuthCtx);
   const toast = useContext(ToastCtx);
   const [filter, setFilter] = useState("all");
-  const [redeeming, setRedeeming] = useState(false);
   const pts = user?.pts || 0;
 
   const filtered = filter==="all" ? REWARDS : REWARDS.filter(r=>r.cat===filter);
 
-  const redeem = async (r) => {
+  const redeem = (r) => {
     if (pts < r.pts) { toast("Not enough points yet", "error"); return; }
-    setRedeeming(true);
-    try {
-      const data = await api("/api/rewards/redeem", { method: "POST", body: JSON.stringify({ rewardId: r.id }) });
-      updateUser({ pts: data.remainingPts });
-      toast(data.message || `${r.label} redeemed! 🎉`, "success");
-    } catch (err) {
-      toast(err.message || "Redemption failed", "error");
-    } finally {
-      setRedeeming(false);
-    }
+    toast(`${r.label} redeemed! Check your inbox 🎉`, "success");
   };
 
   return (
@@ -1237,17 +1151,9 @@ function RewardsTab() {
 // DASHBOARD TAB
 // ═══════════════════════════════════════════════════════════════════════════
 function DashboardTab() {
-  const { user, logout, updateUser } = useContext(AuthCtx);
+  const { user, logout } = useContext(AuthCtx);
   const toast = useContext(ToastCtx);
-  const [myReports, setMyReports] = useState([]);
-
-  useEffect(() => {
-    api("/api/users/me").then(data => {
-      if (data.user) updateUser(data.user);
-      if (Array.isArray(data.reports)) setMyReports(data.reports.map(r => ({ id: r.id, cat: r.category, title: r.title, status: r.status, pts: r.pts_awarded, time: r.created_at, city: r.city, aiScore: r.ai_score })));
-    }).catch(() => setMyReports(Store.get("myReports", [])));
-  }, [updateUser]);
-
+  const myReports = Store.get("myReports", []);
   const pts = user?.pts || 0;
   const reports = user?.reports || 0;
 
@@ -1268,7 +1174,7 @@ function DashboardTab() {
           </div>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:8 }}>
-          {[["⭐",pts.toLocaleString(),"Points"],["📢",reports,"Reports"],["✅",myReports.filter(r=>r.status==="resolved").length,"Resolved"],["🔥",user?.streak||0,"Streak"]].map(([icon,v,l]) => (
+          {[["⭐",pts.toLocaleString(),"Points"],["📢",reports,"Reports"],["✅","0","Resolved"],["🔥",user?.streak||0,"Streak"]].map(([icon,v,l]) => (
             <div key={l} style={{ textAlign:"center" }}>
               <div style={{ fontSize:16 }}>{icon}</div>
               <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:18, color:"var(--white)" }}>{v}</div>
@@ -1452,11 +1358,6 @@ function ToggleRow({ label, sub, val, onChange, color="var(--saffron)" }) {
 
 // ─── RENDER ───────────────────────────────────────────────────────────────────
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-
-// PWA: register service worker
-if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js").catch(() => {});
-}
 </script>
 </body>
 </html>

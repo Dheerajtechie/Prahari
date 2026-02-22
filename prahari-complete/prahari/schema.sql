@@ -357,14 +357,19 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_users_updated   BEFORE UPDATE ON users   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_reports_updated BEFORE UPDATE ON reports FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- ─── ROW LEVEL SECURITY (optional) ───────────────────────────────────────────
--- Uncomment below when using per-request app.user_id in your API middleware.
--- ALTER TABLE users      ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE redemptions ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE points_ledger ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
--- CREATE POLICY users_own_data ON users FOR ALL USING (id = current_setting('app.user_id', true)::UUID);
--- CREATE POLICY redemptions_own ON redemptions FOR ALL USING (user_id = current_setting('app.user_id', true)::UUID);
+-- ─── SECURITY: ROW LEVEL SECURITY ───────────────────────────────────────────
+-- Enable RLS (especially important if using Supabase)
+ALTER TABLE users      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE redemptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE points_ledger ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own sensitive data
+CREATE POLICY users_own_data ON users
+  FOR ALL USING (id = current_setting('app.user_id', true)::UUID);
+
+CREATE POLICY redemptions_own ON redemptions
+  FOR ALL USING (user_id = current_setting('app.user_id', true)::UUID);
 
 -- ─── SAMPLE DATA (remove in production) ─────────────────────────────────────
 -- DO $$

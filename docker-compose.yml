@@ -1,0 +1,25 @@
+# Prahari — local PostgreSQL for development
+# Run: docker-compose up -d
+# Then: node run-schema.js  (or npm run db:init)
+# Then: npm start
+
+version: "3.8"
+services:
+  db:
+    image: postgis/postgis:15-3-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: prahari
+    ports:
+      - "5432:5432"
+    volumes:
+      - prahari_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  prahari_pgdata: {}

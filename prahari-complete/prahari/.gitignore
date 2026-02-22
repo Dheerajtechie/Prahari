@@ -1,0 +1,26 @@
+# Security — NEVER commit these
+.env
+.env.local
+.env.production
+*.pem
+*.key
+*.cert
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Uploads (use Cloudinary instead)
+uploads/
+
+# Logs
+logs/
+*.log

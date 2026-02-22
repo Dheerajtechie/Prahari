@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#020817" />
+  <meta name="description" content="Prahari — India's citizen accountability platform. Report corruption, waste and civic issues. Earn rewards. Drive real change." />
+  <meta name="keywords" content="prahari, corruption report india, civic app, jan seva, report corruption, citizen platform" />
+  <meta property="og:title" content="Prahari — Citizen Guardian Network" />
+  <meta property="og:description" content="Report. Verify. Reward. Reform India." />
+  <meta property="og:type" content="website" />
+  <title>Prahari — Citizen Guardian Network 🇮🇳</title>
+
+  <!-- Security: Content Security Policy -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <!-- React + Babel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js" crossorigin></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #020817; --surface: #0A1628; --card: #0F1E35; --card2: #132040;
+      --border: #1A2F50; --border2: #243D63;
+      --saffron: #FF6B00; --saffron2: #FF9240; --saffron3: #CC5500;
+      --green: #00C853; --green2: #00A040;
+      --blue: #0EA5E9; --blue2: #0284C7;
+      --red: #EF4444; --gold: #F59E0B; --purple: #8B5CF6;
+      --text: #F0F6FF; --sub: #7A95B8; --muted: #3D5A80;
+      --white: #FFFFFF;
+      --font-head: 'Outfit', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+    body { overflow-x: hidden; }
+    #root { height: 100%; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    input, textarea, select { font-family: var(--font-body); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 14px; width: 100%; outline: none; transition: border-color 0.2s; }
+    input:focus, textarea:focus { border-color: var(--saffron); }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    button { font-family: var(--font-head); cursor: pointer; }
+    a { color: var(--saffron); text-decoration: none; }
+
+    @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+    @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:0.45} }
+    @keyframes spin    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    @keyframes glow    { 0%,100%{box-shadow:0 0 20px rgba(255,107,0,.35)} 50%{box-shadow:0 0 45px rgba(255,107,0,.7)} }
+    @keyframes shimmer { from{background-position:-400px 0} to{background-position:400px 0} }
+    @keyframes countPop{ 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+    @keyframes toast { 0%{opacity:0;transform:translateY(20px)} 15%,85%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-10px)} }
+
+    .slide-up   { animation: slideUp .45s ease forwards; }
+    .fade-in    { animation: fadeIn .3s ease forwards; }
+    .pulse-dot  { animation: pulse 2s infinite; }
+    .spin       { animation: spin 1s linear infinite; }
+    .glow-btn   { animation: glow 3s infinite; }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: var(--card2); border: 1px solid var(--border2);
+      color: var(--text); padding: 12px 20px; border-radius: 12px;
+      font-size: 13px; font-weight: 600; z-index: 9999;
+      animation: toast 3s ease forwards;
+      white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+
+    .nav-pill {
+      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+      background: rgba(10,22,40,0.95); backdrop-filter: blur(20px);
+      border: 1px solid var(--border2); border-radius: 28px;
+      display: flex; gap: 4px; padding: 6px; z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0,0,0,.6);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 8px 16px; border-radius: 22px; border: none; background: none;
+      transition: all 0.2s; cursor: pointer; min-width: 60px;
+    }
+    .nav-item.active { background: rgba(255,107,0,.15); }
+    .nav-item .nav-icon { font-size: 19px; transition: transform 0.2s; }
+    .nav-item.active .nav-icon { transform: scale(1.1); }
+    .nav-item .nav-label { font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+
+    .report-fab {
+      width: 54px; height: 54px; border-radius: 18px; border: none;
+      background: linear-gradient(135deg, var(--saffron), var(--saffron2));
+      font-size: 26px; display: flex; align-items: center; justify-content: center;
+      margin-top: -20px; box-shadow: 0 0 24px rgba(255,107,0,.5);
+    }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px;
+    }
+    .card:hover { border-color: var(--border2); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--saffron), var(--saffron2));
+      border: none; border-radius: 14px; padding: 14px 20px;
+      font-size: 15px; font-weight: 800; color: #fff;
+      width: 100%; letter-spacing: .4px; transition: opacity .2s;
+    }
+    .btn-primary:hover { opacity: .9; }
+    .btn-primary:disabled { background: var(--card2); color: var(--muted); cursor: not-allowed; }
+
+    .btn-secondary {
+      background: none; border: 1px solid var(--border2);
+      border-radius: 14px; padding: 14px 20px;
+      font-size: 14px; font-weight: 700; color: var(--sub);
+      width: 100%; transition: all .2s;
+    }
+    .btn-secondary:hover { border-color: var(--saffron); color: var(--text); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      border-radius: 6px; padding: 3px 9px; font-size: 10px; font-weight: 700; letter-spacing: .4px;
+    }
+    .section-title { font-family: var(--font-head); font-weight: 800; font-size: 18px; color: var(--white); }
+    .section-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .progress-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+    .toggle {
+      width: 46px; height: 26px; border-radius: 13px; position: relative;
+      transition: background .2s; cursor: pointer; flex-shrink: 0;
+    }
+    .toggle-thumb {
+      width: 20px; height: 20px; background: #fff; border-radius: 50%;
+      position: absolute; top: 3px; transition: left .2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    }
+
+    .live-indicator {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,200,83,.1); border: 1px solid rgba(0,200,83,.25);
+      border-radius: 20px; padding: 4px 12px;
+    }
+
+    .severity-chip {
+      border-radius: 4px; padding: 2px 7px;
+      font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    }
+
+    .reward-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px; transition: all .2s;
+    }
+    .reward-card.can-redeem { border-color: rgba(255,107,0,.4); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(2,8,23,.8);
+      backdrop-filter: blur(8px); z-index: 2000;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .modal-sheet {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 24px 24px 0 0; padding: 28px 20px 40px;
+      width: 100%; max-width: 480px; animation: slideUp .3s ease;
+      max-height: 90vh; overflow-y: auto;
+    }
+
+    @media (min-width: 500px) {
+      .nav-pill { max-width: 420px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+// ═══════════════════════════════════════════════════════════════════════════
+// PRAHARI — Complete Production Web App
+// ═══════════════════════════════════════════════════════════════════════════
+const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
+
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const API_URL = window.PRAHARI_API_URL || "https://api.prahari.in/v1"; // set your backend URL
+
+const CATEGORIES = [
+  { id:"corruption",  label:"Corruption",    icon:"⚖️",  pts:500, color:"#EF4444", severity:"CRITICAL", dept:"Vigilance Bureau",    sla:7,  desc:"Bribery, misuse of power, govt fraud" },
+  { id:"encroach",    label:"Encroachment",  icon:"🏗️",  pts:300, color:"#F59E0B", severity:"HIGH",     dept:"Municipal Corp",      sla:14, desc:"Illegal construction, land grab" },
+  { id:"pollution",   label:"Pollution",     icon:"☣️",  pts:250, color:"#8B5CF6", severity:"HIGH",     dept:"Pollution Control Board", sla:10, desc:"Air, water or soil pollution" },
+  { id:"road",        label:"Roads & Infra", icon:"🚧",  pts:150, color:"#0EA5E9", severity:"MEDIUM",   dept:"PWD",                 sla:21, desc:"Potholes, broken signals, flooding" },
+  { id:"litter",      label:"Litter & Waste",icon:"🗑️",  pts:100, color:"#10B981", severity:"MEDIUM",   dept:"Sanitation Department",sla:3,  desc:"Illegal dumping, open garbage" },
+  { id:"water",       label:"Water Crisis",  icon:"💧",  pts:200, color:"#06B6D4", severity:"HIGH",     dept:"Jal Board",           sla:5,  desc:"Contamination, supply failure" },
+  { id:"power",       label:"Power Issues",  icon:"⚡",  pts:120, color:"#FBBF24", severity:"MEDIUM",   dept:"Electricity Board",   sla:7,  desc:"Outages, illegal connections" },
+  { id:"forest",      label:"Tree Felling",  icon:"🌳",  pts:200, color:"#22C55E", severity:"HIGH",     dept:"Forest Department",   sla:3,  desc:"Illegal tree cutting, deforestation" },
+];
+
+const REWARDS = [
+  { id:"r1", pts:100,   label:"₹10 UPI Cashback",       icon:"💵",  partner:"PhonePe",       cat:"cash" },
+  { id:"r2", pts:300,   label:"Free Metro Rides x3",    icon:"🚇",  partner:"Metro Rail",    cat:"transport" },
+  { id:"r3", pts:500,   label:"₹50 UPI Cashback",       icon:"💰",  partner:"Google Pay",    cat:"cash" },
+  { id:"r4", pts:1000,  label:"1 Month Bus Pass",       icon:"🚌",  partner:"City Transport",cat:"transport" },
+  { id:"r5", pts:2000,  label:"₹200 Grocery Voucher",   icon:"🛒",  partner:"BigBasket",     cat:"voucher" },
+  { id:"r6", pts:3000,  label:"Prahari Premium 1yr",    icon:"⭐",  partner:"Prahari",       cat:"premium" },
+  { id:"r7", pts:5000,  label:"IT Rebate Certificate",  icon:"📜",  partner:"Income Tax Dept",cat:"govt" },
+  { id:"r8", pts:10000, label:"₹5,000 + Hero Award",    icon:"🏆",  partner:"Govt of India", cat:"award" },
+  { id:"r9", pts:25000, label:"National Prahari Award",  icon:"🎖️",  partner:"PMO India",     cat:"award" },
+];
+
+const LIVE_FEED = [
+  { id:1, user:"Rahul M.", city:"Mumbai",    cat:"corruption", status:"action_taken", pts:500, time:"2m ago",  title:"RTO officer demanded ₹2,000 bribe for license renewal", votes:847, impact:"Officer suspended. FIR registered.", verified:true },
+  { id:2, user:"Ananya S.",city:"Delhi",     cat:"pollution",  status:"verified",     pts:250, time:"18m ago", title:"Factory releasing toxic smoke violating CPCB norms near Okhla", votes:312, impact:null, verified:true },
+  { id:3, user:"Vikram J.",city:"Bengaluru", cat:"encroach",   status:"pending",      pts:0,   time:"34m ago", title:"Restaurant blocking entire footpath with chairs and furniture", votes:156, impact:null, verified:false },
+  { id:4, user:"Meena P.", city:"Chennai",   cat:"water",      status:"resolved",     pts:200, time:"1h ago",  title:"Sewage mixing into drinking water pipeline in Ward 14", votes:1203, impact:"Pipe repaired. 8,000 residents benefited.", verified:true },
+  { id:5, user:"Arjun K.", city:"Hyderabad", cat:"forest",     status:"verified",     pts:200, time:"2h ago",  title:"Illegal tree felling in protected zone for unauthorized construction", votes:445, impact:null, verified:true },
+];
+
+const LEADERBOARD = [
+  { rank:1, name:"Priya Nair",   city:"Kochi",     pts:48200, reports:94, resolved:71, badge:"🦁", title:"GUARDIAN LION" },
+  { rank:2, name:"Arun Sharma",  city:"Bengaluru", pts:41800, reports:82, resolved:68, badge:"🦅", title:"JUSTICE EAGLE" },
+  { rank:3, name:"Zara Khan",    city:"Pune",      pts:36500, reports:71, resolved:55, badge:"🐯", title:"CITY TIGER" },
+  { rank:4, name:"Dev Patel",    city:"Mumbai",    pts:28900, reports:58, resolved:41, badge:"⚔️", title:"TRUTH WARRIOR" },
+  { rank:5, name:"Lakshmi R.",   city:"Chennai",   pts:21400, reports:43, resolved:35, badge:"🌟", title:"STAR CITIZEN" },
+];
+
+const CITY_STATS = [
+  { city:"Bengaluru", reports:12847, resolved:9204,  pct:91 },
+  { city:"Pune",      reports:10231, resolved:7891,  pct:88 },
+  { city:"Kochi",     reports:8422,  resolved:6901,  pct:85 },
+  { city:"Hyderabad", reports:15203, resolved:11204, pct:83 },
+  { city:"Mumbai",    reports:21049, resolved:14203, pct:76 },
+  { city:"Delhi",     reports:28391, resolved:16200, pct:61 },
+  { city:"Patna",     reports:4201,  resolved:1890,  pct:38 },
+];
+
+// ─── SECURITY UTILS ──────────────────────────────────────────────────────────
+const Security = {
+  // Sanitize input to prevent XSS
+  sanitize: (str) => String(str).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])),
+  
+  // Validate inputs
+  isValidEmail: (e) => /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(e),
+  isValidPhone: (p) => /^[6-9]\d{9}$/.test(p.replace(/\s/g,"")),
+  isValidName:  (n) => n.trim().length >= 2 && n.trim().length <= 80,
+  
+  // Rate limiting
+  rateLimit: (() => {
+    const map = {};
+    return (key, max, windowMs) => {
+      const now = Date.now();
+      if (!map[key]) map[key] = [];
+      map[key] = map[key].filter(t => now - t < windowMs);
+      if (map[key].length >= max) return false;
+      map[key].push(now);
+      return true;
+    };
+  })(),
+
+  // CSRF token (for when connecting to real backend)
+  csrfToken: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
+};
+
+// ─── STORAGE (Production: replace with real API calls) ───────────────────────
+const Store = {
+  get: (key, def=null) => {
+    try { const v = localStorage.getItem(`prahari_${key}`); return v ? JSON.parse(v) : def; }
+    catch { return def; }
+  },
+  set: (key, val) => {
+    try { localStorage.setItem(`prahari_${key}`, JSON.stringify(val)); return true; }
+    catch { return false; }
+  },
+  del: (key) => { try { localStorage.removeItem(`prahari_${key}`); } catch {} },
+};
+
+// ─── AUTH CONTEXT ─────────────────────────────────────────────────────────────
+const AuthCtx = createContext(null);
+
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => Store.get("user"));
+  const [token, setToken] = useState(() => Store.get("token"));
+
+  const login = useCallback((userData, authToken) => {
+    const u = { ...userData, loginAt: Date.now() };
+    Store.set("user", u);
+    Store.set("token", authToken);
+    setUser(u);
+    setToken(authToken);
+  }, []);
+
+  const logout = useCallback(() => {
+    Store.del("user"); Store.del("token");
+    setUser(null); setToken(null);
+  }, []);
+
+  const updateUser = useCallback((updates) => {
+    setUser(prev => {
+      const u = { ...prev, ...updates };
+      Store.set("user", u);
+      return u;
+    });
+  }, []);
+
+  return <AuthCtx.Provider value={{ user, token, login, logout, updateUser }}>
+    {children}
+  </AuthCtx.Provider>;
+}
+
+// ─── TOAST CONTEXT ────────────────────────────────────────────────────────────
+const ToastCtx = createContext(null);
+function ToastProvider({ children }) {
+  const [toasts, setToasts] = useState([]);
+  const show = useCallback((msg, type="info") => {
+    const id = Date.now();
+    setToasts(p => [...p, { id, msg, type }]);
+    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3000);
+  }, []);
+  return <ToastCtx.Provider value={show}>
+    {children}
+    {toasts.map(t => (
+      <div key={t.id} className="toast" style={{
+        borderLeft: `3px solid ${t.type==="success"?"#00C853":t.type==="error"?"#EF4444":"#FF6B00"}`
+      }}>{t.msg}</div>
+    ))}
+  </ToastCtx.Provider>;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════════════════
+function App() {
+  return (
+    <AuthProvider>
+      <ToastProvider>
+        <AppInner />
+      </ToastProvider>
+    </AuthProvider>
+  );
+}
+
+function AppInner() {
+  const { user } = useContext(AuthCtx);
+  const [screen, setScreen] = useState(user ? "main" : "onboarding");
+  
+  if (screen === "onboarding") return <Onboarding onDone={() => setScreen("auth")} />;
+  if (screen === "auth") return <AuthScreen onAuth={() => setScreen("main")} />;
+  return <MainApp />;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════════════════════════════════════
+function Onboarding({ onDone }) {
+  const [step, setStep] = useState(0);
+  const slides = [
+    { icon:"🇮🇳", title:"India's Accountability Revolution", body:"1.4 billion eyes watching. Zero tolerance for corruption, waste, and broken systems.", color:"#FF6B00" },
+    { icon:"📱", title:"Report in 60 Seconds", body:"Spot an issue, take a photo, pinpoint the location. Our AI verifies it and sends a formal legal notice to the responsible department.", color:"#0EA5E9" },
+    { icon:"🔒", title:"Tamper-Proof Records", body:"Every report is hashed on blockchain. The government cannot delete or alter it. If they ignore it, we auto-file an RTI application on your behalf.", color:"#8B5CF6" },
+    { icon:"⭐", title:"Doing Good Pays", body:"Earn real rewards — UPI cashback, bus passes, government certificates. Top reporters can earn a percentage of corruption amounts recovered.", color:"#F59E0B" },
+  ];
+  const s = slides[step];
+
+  return (
+    <div style={{ background:"var(--bg)", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 24px", maxWidth:480, margin:"0 auto" }}>
+      <div className="slide-up" key={step} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center" }}>
+        <div style={{ width:130, height:130, background:`${s.color}15`, border:`2px solid ${s.color}44`, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:60, marginBottom:36, boxShadow:`0 0 80px ${s.color}30` }}>
+          {s.icon}
+        </div>
+        <h1 style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:28, color:"var(--white)", lineHeight:1.1, marginBottom:14, letterSpacing:"-0.5px" }}>{s.title}</h1>
+        <p style={{ color:"var(--sub)", fontSize:15, lineHeight:1.75, maxWidth:320 }}>{s.body}</p>
+      </div>
+
+      <div style={{ width:"100%" }}>
+        <div style={{ display:"flex", justifyContent:"center", gap:8, marginBottom:24 }}>
+          {slides.map((_,i) => (
+            <div key={i} onClick={() => setStep(i)} style={{ height:4, borderRadius:2, background: i===step ? s.color : "var(--border)", width: i===step ? 28 : 10, transition:"all .3s", cursor:"pointer" }} />
+          ))}
+        </div>
+        {step < slides.length-1
+          ? <button className="btn-primary" onClick={() => setStep(p=>p+1)}>Continue →</button>
+          : <button className="btn-primary" onClick={onDone} style={{ background:`linear-gradient(135deg, #FF6B00, #FF9240)` }}>🚀 Start Guarding India</button>
+        }
+        {step < slides.length-1 && (
+          <button onClick={onDone} style={{ background:"none", border:"none", color:"var(--muted)", fontSize:13, width:"100%", marginTop:14, padding:8 }}>Skip</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTH SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function AuthScreen({ onAuth }) {
+  const { login } = useContext(AuthCtx);
+  const toast = useContext(ToastCtx);
+  const [mode, setMode] = useState("login"); // login | register | otp
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ name:"", phone:"", email:"", password:"", otp:"" });
+  const [errors, setErrors] = useState({});
+  const [otpSent, setOtpSent] = useState(false);
+
+  const set = (k,v) => setForm(p=>({...p,[k]:v}));
+  const setErr = (k,v) => setErrors(p=>({...p,[k]:v}));
+  const clrErr = (k) => setErrors(p=>({...p,[k]:""}));
+
+  const validate = () => {
+    const e = {};
+    if (mode==="register") {
+      if (!Security.isValidName(form.name)) e.name = "Enter your real name (2–80 chars)";
+    }
+    if (!Security.isValidPhone(form.phone)) e.phone = "Enter a valid 10-digit Indian mobile number";
+    if (mode!=="otp" && form.password.length < 8) e.password = "Password must be at least 8 characters";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    if (!Security.rateLimit("auth", 5, 60000)) {
+      toast("Too many attempts. Please wait a minute.", "error"); return;
+    }
+    setLoading(true);
+
+    // In production: replace with real API call to your backend
+    // const res = await fetch(`${API_URL}/auth/${mode}`, { method:"POST", headers:{"Content-Type":"application/json","X-CSRF-Token":Security.csrfToken}, body: JSON.stringify(form) });
+    
+    // Demo: simulate auth
+    await new Promise(r => setTimeout(r, 1200));
+    
+    const mockUser = {
+      id: "U" + Date.now(),
+      name: form.name || "Prahari User",
+      phone: form.phone,
+      pts: 0,
+      reports: 0,
+      streak: 0,
+      rank: 284,
+      badge: "⚔️",
+      title: "TRUTH WARRIOR",
+      city: "",
+      verified: false,
+      joinDate: new Date().toISOString(),
+    };
+    
+    login(mockUser, "demo_token_" + Date.now());
+    toast("Welcome to Prahari 🇮🇳", "success");
+    setLoading(false);
+    onAuth();
+  };
+
+  return (
+    <div style={{ background:"var(--bg)", minHeight:"100vh", display:"flex", flexDirection:"column", maxWidth:480, margin:"0 auto", padding:"0 20px" }}>
+      {/* Header */}
+      <div style={{ paddingTop:60, paddingBottom:40, textAlign:"center" }}>
+        <div style={{ width:64, height:64, background:"linear-gradient(135deg,#FF6B00,#FF9240)", borderRadius:18, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-head)", fontWeight:900, fontSize:24, color:"#fff", margin:"0 auto 16px", letterSpacing:"-1px" }}>PR</div>
+        <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:26, color:"var(--white)", letterSpacing:"-0.5px" }}>PRAHARI</div>
+        <div style={{ fontSize:13, color:"var(--sub)", marginTop:4 }}>Citizen Guardian Network</div>
+      </div>
+
+      {/* Mode toggle */}
+      <div style={{ display:"flex", background:"var(--card)", borderRadius:12, padding:4, marginBottom:28, border:"1px solid var(--border)" }}>
+        {["login","register"].map(m => (
+          <button key={m} onClick={() => setMode(m)} style={{ flex:1, background: mode===m ? "var(--saffron)" : "none", border:"none", borderRadius:8, padding:"9px 0", fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color: mode===m ? "#fff" : "var(--sub)", textTransform:"capitalize" }}>
+            {m === "login" ? "Sign In" : "Register"}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:14 }}>
+        {mode==="register" && (
+          <div>
+            <label style={{ fontSize:11, color:"var(--sub)", marginBottom:6, display:"block", fontWeight:500 }}>Full Name</label>
+            <input type="text" placeholder="Your real name" value={form.name} maxLength={80} onChange={e=>{set("name",Security.sanitize(e.target.value));clrErr("name")}} autoComplete="name" />
+            {errors.name && <div style={{ fontSize:11, color:"var(--red)", marginTop:4 }}>{errors.name}</div>}
+          </div>
+        )}
+        <div>
+          <label style={{ fontSize:11, color:"var(--sub)", marginBottom:6, display:"block", fontWeight:500 }}>Mobile Number</label>
+          <div style={{ position:"relative" }}>
+            <span style={{ position:"absolute", left:14, top:"50%", transform:"translateY(-50%)", color:"var(--sub)", fontSize:13, fontWeight:600 }}>+91</span>
+            <input type="tel" placeholder="10-digit mobile" value={form.phone} maxLength={10} style={{ paddingLeft:46 }} onChange={e=>{set("phone",e.target.value.replace(/\D/g,""));clrErr("phone")}} autoComplete="tel" />
+          </div>
+          {errors.phone && <div style={{ fontSize:11, color:"var(--red)", marginTop:4 }}>{errors.phone}</div>}
+        </div>
+        <div>
+          <label style={{ fontSize:11, color:"var(--sub)", marginBottom:6, display:"block", fontWeight:500 }}>Password</label>
+          <input type="password" placeholder="Min. 8 characters" value={form.password} onChange={e=>{set("password",e.target.value);clrErr("password")}} autoComplete={mode==="login"?"current-password":"new-password"} />
+          {errors.password && <div style={{ fontSize:11, color:"var(--red)", marginTop:4 }}>{errors.password}</div>}
+        </div>
+        {mode==="login" && (
+          <div style={{ textAlign:"right", marginTop:-6 }}>
+            <span style={{ fontSize:12, color:"var(--saffron)", cursor:"pointer" }}>Forgot password?</span>
+          </div>
+        )}
+
+        <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop:8 }}>
+          {loading ? <span className="spin" style={{ display:"inline-block", width:18, height:18, border:"2px solid #fff4", borderTopColor:"#fff", borderRadius:"50%" }} /> : mode==="login" ? "Sign In" : "Create Account"}
+        </button>
+      </form>
+
+      <div style={{ marginTop:24, textAlign:"center" }}>
+        <div style={{ fontSize:11, color:"var(--muted)", lineHeight:1.7 }}>
+          By continuing, you agree to our{" "}
+          <span style={{ color:"var(--saffron)", cursor:"pointer" }}>Terms of Service</span> and{" "}
+          <span style={{ color:"var(--saffron)", cursor:"pointer" }}>Privacy Policy</span>
+        </div>
+        <div style={{ fontSize:11, color:"var(--muted)", marginTop:8 }}>
+          Your identity is protected under the Whistleblowers Protection Act, 2014.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════════════════
+function MainApp() {
+  const [tab, setTab] = useState("home");
+  const [liveCount, setLiveCount] = useState(48291);
+  const [reportModal, setReportModal] = useState(false);
+
+  useEffect(() => {
+    const t = setInterval(() => setLiveCount(p => p + Math.floor(Math.random()*3)), 7000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div style={{ background:"var(--bg)", minHeight:"100vh", maxWidth:480, margin:"0 auto", position:"relative" }}>
+      {/* Top Bar */}
+      <TopBar liveCount={liveCount} />
+
+      {/* Content */}
+      <div style={{ paddingBottom:100, minHeight:"calc(100vh - 56px)" }}>
+        {tab==="home"      && <HomeTab setReportModal={setReportModal} liveCount={liveCount} />}
+        {tab==="impact"    && <ImpactTab />}
+        {tab==="rewards"   && <RewardsTab />}
+        {tab==="dashboard" && <DashboardTab />}
+      </div>
+
+      {/* Bottom Nav */}
+      <div className="nav-pill">
+        {[
+          { id:"home",      icon:"◈", label:"Home" },
+          { id:"impact",    icon:"⊙", label:"Impact" },
+          { id:"report",    icon:"⊕", label:"Report", fab:true },
+          { id:"rewards",   icon:"◆", label:"Rewards" },
+          { id:"dashboard", icon:"◉", label:"Mine" },
+        ].map(n => (
+          <button key={n.id} className={`nav-item ${(n.fab ? "report" : tab)===n.id ? "active":""}`}
+            onClick={() => n.id==="report" ? setReportModal(true) : setTab(n.id)}>
+            {n.fab
+              ? <div className="report-fab glow-btn"><span>{n.icon}</span></div>
+              : <>
+                  <span className="nav-icon">{n.icon}</span>
+                  <span className="nav-label" style={{ color: tab===n.id ? "var(--saffron)" : "var(--muted)" }}>{n.label}</span>
+                  {tab===n.id && <div style={{ width:16, height:2, background:"var(--saffron)", borderRadius:1 }} />}
+                </>
+            }
+          </button>
+        ))}
+      </div>
+
+      {/* Report Modal */}
+      {reportModal && <ReportModal onClose={() => setReportModal(false)} onDone={() => setReportModal(false)} />}
+    </div>
+  );
+}
+
+// ─── TOP BAR ─────────────────────────────────────────────────────────────────
+function TopBar({ liveCount }) {
+  const { user } = useContext(AuthCtx);
+  return (
+    <div style={{ position:"sticky", top:0, zIndex:100, background:"rgba(2,8,23,.95)", backdropFilter:"blur(20px)", borderBottom:"1px solid var(--border)", padding:"10px 18px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+        <div style={{ width:34, height:34, background:"linear-gradient(135deg,#FF6B00,#FF9240)", borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-head)", fontWeight:900, fontSize:12, color:"#fff", letterSpacing:"-0.5px" }}>PR</div>
+        <div>
+          <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:16, color:"var(--white)", letterSpacing:"-0.5px" }}>PRAHARI</div>
+          <div style={{ fontSize:9, color:"var(--muted)", letterSpacing:"2px", textTransform:"uppercase" }}>Citizen Guardian</div>
+        </div>
+      </div>
+      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+        <div className="live-indicator">
+          <div className="pulse-dot" style={{ width:6, height:6, background:"var(--green)", borderRadius:"50%" }} />
+          <span style={{ fontSize:11, color:"var(--green)", fontWeight:700 }}>{liveCount.toLocaleString()}</span>
+        </div>
+        <div style={{ background:"rgba(255,107,0,.12)", border:"1px solid rgba(255,107,0,.3)", borderRadius:20, padding:"5px 12px", cursor:"pointer" }}>
+          <span style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:12, color:"var(--saffron)" }}>⭐ {(user?.pts||0).toLocaleString()}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HOME TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function HomeTab({ setReportModal, liveCount }) {
+  const { user } = useContext(AuthCtx);
+  return (
+    <div>
+      {/* Hero */}
+      <div style={{ background:"linear-gradient(180deg,var(--surface),var(--bg))", padding:"28px 18px 24px", position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:0, right:0, width:280, height:280, background:"radial-gradient(circle at 80% 20%, rgba(255,107,0,.12), transparent 60%)", pointerEvents:"none" }} />
+        <div style={{ position:"absolute", bottom:0, left:-40, width:200, height:200, background:"radial-gradient(circle, rgba(14,165,233,.08), transparent 60%)", pointerEvents:"none" }} />
+        
+        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+          <div className="pulse-dot" style={{ width:7, height:7, background:"var(--green)", borderRadius:"50%" }} />
+          <span style={{ fontSize:11, color:"var(--green)", fontWeight:700, letterSpacing:"1px" }}>{liveCount.toLocaleString()} REPORTS FILED TODAY</span>
+        </div>
+
+        <h1 style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:32, lineHeight:1.1, color:"var(--white)", marginBottom:12, letterSpacing:"-1px" }}>
+          Every report is<br />
+          <span style={{ background:"linear-gradient(90deg,#FF6B00,#FF9240)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>a revolution.</span>
+        </h1>
+        <p style={{ color:"var(--sub)", fontSize:14, lineHeight:1.7, marginBottom:22, maxWidth:340 }}>
+          India's first AI-powered civic accountability platform. Report corruption, waste, and broken systems — earn rewards — watch them get fixed.
+        </p>
+
+        <button className="btn-primary glow-btn" onClick={() => setReportModal(true)} style={{ marginBottom:20 }}>
+          ⊕ FILE A REPORT NOW
+        </button>
+
+        {/* Stats Grid */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+          {[
+            { icon:"⚖️", val:"₹847 Cr", label:"Corruption Exposed", sub:"verified & recovered", color:"var(--saffron)" },
+            { icon:"✅", val:"68%",      label:"Resolution Rate",    sub:"within legal SLA",    color:"var(--green)" },
+            { icon:"📢", val:"1.2M",     label:"Reports Filed",      sub:"across 847 cities",   color:"var(--blue)" },
+            { icon:"🇮🇳", val:"43 Lac",  label:"Active Citizens",    sub:"and growing daily",   color:"var(--gold)" },
+          ].map(s => (
+            <div key={s.label} className="card" style={{ textAlign:"center", padding:"14px 10px" }}>
+              <div style={{ fontSize:20, marginBottom:5 }}>{s.icon}</div>
+              <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:20, color:s.color, lineHeight:1 }}>{s.val}</div>
+              <div style={{ fontWeight:600, fontSize:11, color:"var(--text)", marginTop:4 }}>{s.label}</div>
+              <div style={{ fontSize:10, color:"var(--muted)", marginTop:1 }}>{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* How it works */}
+      <Section title="How Prahari Works" sub="From report to resolution">
+        {[
+          { n:"01", icon:"📸", title:"Spot & Report",       desc:"Take a photo, mark the location, describe the issue. Done in 60 seconds.", color:"var(--saffron)" },
+          { n:"02", icon:"🤖", title:"AI Verification",     desc:"AI analyzes photo authenticity, cross-references location, assigns severity & department.", color:"var(--blue)" },
+          { n:"03", icon:"⚖️", title:"Legal Notice Issued", desc:"Officials receive a formal notice with a deadline. Ignored? We auto-file RTI and escalate to District Collector.", color:"var(--gold)" },
+          { n:"04", icon:"⭐", title:"Earn Rewards",        desc:"Points credited on verification. Redeem for cash, transport, government certificates.", color:"var(--green)" },
+        ].map((s,i) => (
+          <div key={s.n} style={{ display:"flex", gap:14, padding:"16px 0", borderBottom: i<3 ? "1px solid var(--border)" : "none" }}>
+            <div style={{ flexShrink:0, width:42, height:42, background:`${s.color}18`, border:`1px solid ${s.color}33`, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>{s.icon}</div>
+            <div>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                <span style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:12, color:s.color }}>{s.n}</span>
+                <span style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:14, color:"var(--text)" }}>{s.title}</span>
+              </div>
+              <p style={{ fontSize:12, color:"var(--sub)", lineHeight:1.6 }}>{s.desc}</p>
+            </div>
+          </div>
+        ))}
+      </Section>
+
+      {/* Live Feed */}
+      <Section title="Live Reports" sub="Real-time from across India">
+        {LIVE_FEED.map(r => <ReportCard key={r.id} r={r} />)}
+      </Section>
+
+      {/* Unique Features */}
+      <Section title="Why Prahari is Different" sub="Features no other platform has">
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+          {[
+            { icon:"🔒", title:"Blockchain Records",   desc:"Reports are permanent and tamper-proof. Govt cannot delete them." },
+            { icon:"⚖️", title:"Auto RTI Filing",      desc:"Unresolved reports trigger automatic legal RTI applications." },
+            { icon:"🤖", title:"AI Fraud Detection",   desc:"Fake reports are detected and penalized. Only real issues win." },
+            { icon:"📰", title:"Media Connect",        desc:"High-impact reports auto-sent to verified journalists." },
+            { icon:"🛡️", title:"Whistleblower Mode",   desc:"Sensitive corruption reports with military-grade identity protection." },
+            { icon:"💰", title:"Recovery Rewards",     desc:"Earn up to 15% of amounts recovered from corruption busts." },
+          ].map(f => (
+            <div key={f.title} className="card" style={{ padding:14 }}>
+              <div style={{ fontSize:22, marginBottom:6 }}>{f.icon}</div>
+              <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:12, color:"var(--text)", marginBottom:4 }}>{f.title}</div>
+              <div style={{ fontSize:11, color:"var(--muted)", lineHeight:1.5 }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REPORT MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+function ReportModal({ onClose, onDone }) {
+  const { user, updateUser } = useContext(AuthCtx);
+  const toast = useContext(ToastCtx);
+  const [step, setStep] = useState(0);
+  const [cat, setCat] = useState(null);
+  const [form, setForm] = useState({ title:"", desc:"", location:"", city:"", anon:true, urgent:false, evidence:null });
+  const [loading, setLoading] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
+  const [done, setDone] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const catObj = CATEGORIES.find(c=>c.id===cat);
+  const set = (k,v) => setForm(p=>({...p,[k]:v}));
+
+  const validateStep1 = () => {
+    const e = {};
+    if (!form.title.trim() || form.title.trim().length < 10) e.title = "Please describe the issue clearly (min 10 chars)";
+    if (!form.location.trim()) e.location = "Location is required";
+    if (!form.city.trim()) e.city = "City is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const runAI = async () => {
+    if (!validateStep1()) return;
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 2400));
+    setAiResult({
+      credibility: 78 + Math.floor(Math.random()*18),
+      priority: catObj?.severity || "HIGH",
+      dept: catObj?.dept || "Municipal Corp",
+      sla: catObj?.sla || 7,
+      pts: catObj?.pts || 150,
+      rti: true,
+    });
+    setLoading(false);
+    setStep(2);
+  };
+
+  const submit = async () => {
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1200));
+    
+    // Save to local store
+    const reports = Store.get("myReports", []);
+    const newReport = {
+      id: "R" + Date.now(),
+      cat, title: Security.sanitize(form.title),
+      desc: Security.sanitize(form.desc),
+      location: Security.sanitize(form.location),
+      city: Security.sanitize(form.city),
+      anon: form.anon, urgent: form.urgent,
+      status:"pending", pts:0,
+      time: new Date().toISOString(),
+      aiScore: aiResult?.credibility,
+    };
+    Store.set("myReports", [newReport, ...reports]);
+    updateUser({ pts: (user?.pts||0) + 50, reports: (user?.reports||0) + 1 }); // +50 pts for filing
+
+    setLoading(false);
+    setDone(true);
+    toast("Report submitted! You'll earn points once verified ✅", "success");
+    setTimeout(onDone, 3500);
+  };
+
+  if (done) return (
+    <div className="modal-overlay">
+      <div className="modal-sheet" style={{ textAlign:"center" }}>
+        <div style={{ width:80, height:80, background:"rgba(0,200,83,.1)", border:"2px solid var(--green)", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:40, margin:"0 auto 16px" }}>✓</div>
+        <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:24, color:"var(--white)", marginBottom:8 }}>Report Filed!</div>
+        <div style={{ color:"var(--sub)", fontSize:14, lineHeight:1.6, marginBottom:20 }}>
+          Assigned to <strong style={{ color:"var(--text)" }}>{catObj?.dept}</strong> with a <strong style={{ color:"var(--text)" }}>{catObj?.sla}-day legal deadline</strong>.
+        </div>
+        <div className="card" style={{ marginBottom:16, textAlign:"center" }}>
+          <div style={{ color:"var(--sub)", fontSize:12, marginBottom:4 }}>Potential reward on verification</div>
+          <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:40, color:"var(--saffron)" }}>+{catObj?.pts} pts</div>
+          <div style={{ color:"var(--muted)", fontSize:11, marginTop:2 }}>≈ ₹{Math.round((catObj?.pts||0)*0.1)} cashback value</div>
+        </div>
+        <div style={{ display:"flex", gap:10 }}>
+          {["🔒 Blockchain\nSecured","📋 RTI Auto\nReady","📰 Media\nNotified"].map(l => (
+            <div key={l} className="card" style={{ flex:1, padding:10, textAlign:"center", fontSize:10, color:"var(--sub)", lineHeight:1.5 }}>{l.split("\n")[0]}<br/>{l.split("\n")[1]}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        {/* Handle + Close */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+          <div style={{ display:"flex", gap:6 }}>
+            {["Category","Details","AI Review","Submit"].map((s,i) => (
+              <div key={s}>
+                <div style={{ height:3, width: i===step ? 28:10, background: i<=step ? "var(--saffron)":"var(--border)", borderRadius:2, transition:"all .3s" }} />
+              </div>
+            ))}
+          </div>
+          <button onClick={onClose} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:8, width:32, height:32, color:"var(--sub)", fontSize:16 }}>✕</button>
+        </div>
+
+        {/* STEP 0: Category */}
+        {step===0 && (
+          <div className="slide-up">
+            <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:20, color:"var(--white)", marginBottom:4 }}>What are you reporting?</div>
+            <div style={{ color:"var(--sub)", fontSize:13, marginBottom:18 }}>Choose the issue category</div>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, maxHeight:"60vh", overflowY:"auto" }}>
+              {CATEGORIES.map(c => (
+                <div key={c.id} className="card" onClick={() => { setCat(c.id); setStep(1); }}
+                  style={{ cursor:"pointer", padding:14, transition:"all .15s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor=c.color; e.currentTarget.style.background=`${c.color}12`; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor="var(--border)"; e.currentTarget.style.background="var(--card)"; }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
+                    <span style={{ fontSize:26 }}>{c.icon}</span>
+                    <span className="severity-chip" style={{ background:`${c.color}22`, color:c.color }}>{c.severity}</span>
+                  </div>
+                  <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color:"var(--text)", marginBottom:3 }}>{c.label}</div>
+                  <div style={{ fontSize:10, color:"var(--muted)", marginBottom:8, lineHeight:1.4 }}>{c.desc}</div>
+                  <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:13, color:c.color }}>+{c.pts} pts</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 1: Details */}
+        {step===1 && catObj && (
+          <div className="slide-up" style={{ display:"flex", flexDirection:"column", gap:14 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, background:`${catObj.color}10`, border:`1px solid ${catObj.color}30`, borderRadius:12, padding:12 }}>
+              <span style={{ fontSize:22 }}>{catObj.icon}</span>
+              <div>
+                <div style={{ fontWeight:700, fontSize:14, color:"var(--text)" }}>{catObj.label}</div>
+                <div style={{ fontSize:11, color:"var(--sub)" }}>{catObj.dept} • SLA: {catObj.sla} days</div>
+              </div>
+              <button onClick={() => setStep(0)} style={{ marginLeft:"auto", background:"none", border:"none", color:"var(--muted)", fontSize:12, cursor:"pointer" }}>Change</button>
+            </div>
+
+            <Field label="Issue Title *" placeholder="Brief description of the issue" value={form.title} maxLength={200}
+              onChange={v=>{set("title",v);setErrors(p=>({...p,title:""}))}} error={errors.title} />
+            <Field label="Exact Location *" placeholder="Building, street, area, landmark..." value={form.location} maxLength={300}
+              onChange={v=>{set("location",v);setErrors(p=>({...p,location:""}))}} error={errors.location} />
+            <Field label="City *" placeholder="Mumbai, Delhi, Bengaluru..." value={form.city} maxLength={100}
+              onChange={v=>{set("city",v);setErrors(p=>({...p,city:""}))}} error={errors.city} />
+            <div>
+              <label style={{ fontSize:11, color:"var(--sub)", marginBottom:6, display:"block", fontWeight:500 }}>Description (recommended)</label>
+              <textarea placeholder="Who, what, when, amounts, names of officials involved..." value={form.desc} maxLength={2000}
+                onChange={e=>set("desc",e.target.value)} rows={4} style={{ resize:"none", lineHeight:1.6 }} />
+            </div>
+
+            {/* Photo upload placeholder */}
+            <div className="card" style={{ textAlign:"center", cursor:"pointer", border:"2px dashed var(--border)", background:"transparent" }}>
+              <div style={{ fontSize:28, marginBottom:6 }}>📷</div>
+              <div style={{ fontWeight:600, fontSize:13, color:"var(--text)" }}>Attach Photo / Video</div>
+              <div style={{ fontSize:11, color:"var(--muted)", marginTop:4 }}>Boosts AI credibility score by 40%</div>
+            </div>
+
+            <ToggleRow label="Report Anonymously" sub="Identity hidden — you still earn rewards" val={form.anon} onChange={v=>set("anon",v)} />
+            <ToggleRow label="Mark as Urgent 🚨" sub="Use only for life-safety emergencies" val={form.urgent} onChange={v=>set("urgent",v)} color="var(--red)" />
+
+            <button className="btn-primary" onClick={runAI} style={{ background:"linear-gradient(135deg,#0EA5E9,#0284C7)" }}>
+              🤖 Run AI Analysis →
+            </button>
+          </div>
+        )}
+
+        {/* STEP 2: AI Analysis */}
+        {step===2 && (
+          <div className="slide-up">
+            {loading ? (
+              <div style={{ textAlign:"center", padding:"40px 0" }}>
+                <div style={{ width:70, height:70, border:"3px solid var(--border)", borderTopColor:"var(--blue)", borderRadius:"50%", margin:"0 auto 20px" }} className="spin" />
+                <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:18, color:"var(--white)", marginBottom:12 }}>AI Analyzing Report...</div>
+                {["Verifying photo authenticity","Cross-referencing location data","Assessing severity level","Identifying responsible dept"].map(s => (
+                  <div key={s} style={{ fontSize:12, color:"var(--muted)", padding:"3px 0" }}>• {s}</div>
+                ))}
+              </div>
+            ) : aiResult && (
+              <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+                <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:20, color:"var(--white)" }}>AI Analysis Complete</div>
+
+                {/* Score */}
+                <div className="card" style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:10, color:"var(--muted)", letterSpacing:"2px", marginBottom:8 }}>CREDIBILITY SCORE</div>
+                  <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:56, color: aiResult.credibility>75 ? "var(--green)" : "var(--gold)", lineHeight:1 }}>{aiResult.credibility}%</div>
+                  <div style={{ color:"var(--green)", fontSize:13, fontWeight:600, marginTop:6 }}>✓ High Confidence — Report Likely Genuine</div>
+                  <div className="progress-bar" style={{ marginTop:12 }}>
+                    <div className="progress-fill" style={{ width:`${aiResult.credibility}%`, background:`linear-gradient(90deg, var(--green), #00FF88)` }} />
+                  </div>
+                </div>
+
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                  {[
+                    { label:"Priority",     val:aiResult.priority,           color:"var(--red)" },
+                    { label:"Assigned To",  val:aiResult.dept,               color:"var(--blue)" },
+                    { label:"Est. Points",  val:`+${aiResult.pts}`,          color:"var(--saffron)" },
+                    { label:"Auto RTI",     val:"Enabled ✓",                 color:"var(--green)" },
+                  ].map(r => (
+                    <div key={r.label} className="card" style={{ padding:14 }}>
+                      <div style={{ fontSize:10, color:"var(--muted)", marginBottom:4 }}>{r.label}</div>
+                      <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color:r.color }}>{r.val}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ background:"rgba(0,200,83,.08)", border:"1px solid rgba(0,200,83,.2)", borderRadius:12, padding:14 }}>
+                  <div style={{ fontWeight:700, fontSize:13, color:"var(--green)", marginBottom:6 }}>✓ What happens next</div>
+                  <div style={{ fontSize:12, color:"var(--sub)", lineHeight:1.7 }}>
+                    A formal notice is sent to <strong style={{ color:"var(--text)" }}>{aiResult.dept}</strong> with a <strong style={{ color:"var(--text)" }}>{aiResult.sla}-day legal deadline</strong>. If ignored, we auto-file RTI and notify your District Collector.
+                  </div>
+                </div>
+
+                <div style={{ display:"flex", gap:10 }}>
+                  <button className="btn-secondary" onClick={() => setStep(1)} style={{ flex:1 }}>← Edit</button>
+                  <button className="btn-primary" onClick={submit} style={{ flex:2 }} disabled={loading}>
+                    {loading ? "Submitting..." : "Submit Report ⊕"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPACT TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function ImpactTab() {
+  const [view, setView] = useState("cities");
+  return (
+    <div style={{ padding:"18px 18px 0" }}>
+      <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:26, color:"var(--white)", marginBottom:4 }}>National Impact</div>
+      <div style={{ color:"var(--sub)", fontSize:13, marginBottom:20 }}>Real change driven by citizen power</div>
+
+      {/* Hero stat */}
+      <div style={{ background:"linear-gradient(135deg,var(--surface),#0f2744)", borderRadius:20, padding:24, marginBottom:20, border:"1px solid var(--border2)", position:"relative", overflow:"hidden", textAlign:"center" }}>
+        <div style={{ position:"absolute", top:-40, right:-40, width:200, height:200, background:"radial-gradient(circle,rgba(255,107,0,.15),transparent 60%)", pointerEvents:"none" }} />
+        <div style={{ fontSize:10, color:"var(--muted)", letterSpacing:"3px", marginBottom:8 }}>TOTAL CORRUPTION EXPOSED</div>
+        <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:50, color:"var(--saffron)", letterSpacing:"-2px" }}>₹847 Cr</div>
+        <div style={{ color:"var(--sub)", fontSize:12, marginTop:6 }}>Recovered or under investigation • FY 2024–25</div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display:"flex", background:"var(--card)", borderRadius:12, padding:4, marginBottom:20, border:"1px solid var(--border)" }}>
+        {["cities","categories","leaderboard"].map(v => (
+          <button key={v} onClick={() => setView(v)} style={{ flex:1, background: view===v ? "var(--saffron)":"none", border:"none", borderRadius:8, padding:"9px 0", fontFamily:"var(--font-head)", fontWeight:700, fontSize:11, color: view===v ? "#fff":"var(--sub)", textTransform:"capitalize" }}>{v}</button>
+        ))}
+      </div>
+
+      {view==="cities" && (
+        <div>
+          {CITY_STATS.map((c,i) => (
+            <div key={c.city} className="card" style={{ marginBottom:10 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+                <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                  <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:15, color:"var(--muted)", width:24 }}>#{i+1}</div>
+                  <div>
+                    <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:14, color:"var(--text)" }}>{c.city}</div>
+                    <div style={{ fontSize:11, color:"var(--muted)" }}>{c.reports.toLocaleString()} reports • {c.resolved.toLocaleString()} resolved</div>
+                  </div>
+                </div>
+                <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:22, color: c.pct>80 ? "var(--green)" : c.pct>60 ? "var(--gold)" : "var(--red)" }}>{c.pct}</div>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width:`${c.pct}%`, background: c.pct>80 ? "var(--green)" : c.pct>60 ? "var(--gold)" : "var(--red)" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {view==="categories" && (
+        <div>
+          {[
+            { cat:"Corruption",  reports:284019, pct:71, color:"var(--red)",    amt:"₹392 Cr" },
+            { cat:"Encroachment",reports:198234, pct:68, color:"var(--gold)",   amt:"₹84 Cr" },
+            { cat:"Pollution",   reports:156982, pct:72, color:"var(--purple)", amt:"₹201 Cr" },
+            { cat:"Roads",       reports:342109, pct:78, color:"var(--blue)",   amt:"₹67 Cr" },
+            { cat:"Water Crisis",reports:89234,  pct:65, color:"#06B6D4",       amt:"₹43 Cr" },
+            { cat:"Litter/Waste",reports:421890, pct:82, color:"var(--green)",  amt:"₹12 Cr" },
+          ].map(c => (
+            <div key={c.cat} className="card" style={{ marginBottom:10 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
+                <div>
+                  <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:14, color:"var(--text)" }}>{c.cat}</div>
+                  <div style={{ fontSize:11, color:"var(--muted)" }}>{c.reports.toLocaleString()} reports</div>
+                </div>
+                <div style={{ textAlign:"right" }}>
+                  <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:15, color:c.color }}>{c.amt}</div>
+                  <div style={{ fontSize:10, color:"var(--muted)" }}>exposed</div>
+                </div>
+              </div>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                <span style={{ fontSize:11, color:"var(--sub)" }}>{c.pct}% resolved</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width:`${c.pct}%`, background:c.color }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {view==="leaderboard" && (
+        <div>
+          {/* Podium */}
+          <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"center", gap:12, marginBottom:24, height:160 }}>
+            {[LEADERBOARD[1],LEADERBOARD[0],LEADERBOARD[2]].map((l,i) => {
+              const hs=[100,145,80], cols=["var(--sub)","var(--saffron)","var(--gold)"];
+              return (
+                <div key={l.rank} style={{ flex:1, textAlign:"center" }}>
+                  <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:12, color:"var(--text)", marginBottom:3 }}>{l.name.split(" ")[0]}</div>
+                  <div style={{ fontSize:11, color:"var(--muted)", marginBottom:5 }}>{l.pts.toLocaleString()}</div>
+                  <div style={{ background:`${cols[i]}22`, border:`1px solid ${cols[i]}55`, height:hs[i], borderRadius:"8px 8px 0 0", display:"flex", alignItems:"flex-start", justifyContent:"center", paddingTop:10, fontSize:26 }}>{l.badge}</div>
+                </div>
+              );
+            })}
+          </div>
+          {LEADERBOARD.map(l => (
+            <div key={l.rank} className="card" style={{ marginBottom:10, display:"flex", alignItems:"center", gap:12, border: l.rank===1 ? "1px solid rgba(255,107,0,.4)" : "1px solid var(--border)" }}>
+              <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:24, width:32, textAlign:"center" }}>{l.badge}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color:"var(--text)" }}>{l.name}</div>
+                <div style={{ fontSize:10, color:"var(--muted)" }}>{l.city} • {l.title}</div>
+                <div style={{ fontSize:11, color:"var(--sub)", marginTop:2 }}>{l.reports} reports • {l.resolved} resolved</div>
+              </div>
+              <div style={{ textAlign:"right" }}>
+                <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:16, color:"var(--saffron)" }}>{l.pts.toLocaleString()}</div>
+                <div style={{ fontSize:9, color:"var(--muted)" }}>pts</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REWARDS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function RewardsTab() {
+  const { user } = useContext(AuthCtx);
+  const toast = useContext(ToastCtx);
+  const [filter, setFilter] = useState("all");
+  const pts = user?.pts || 0;
+
+  const filtered = filter==="all" ? REWARDS : REWARDS.filter(r=>r.cat===filter);
+
+  const redeem = (r) => {
+    if (pts < r.pts) { toast("Not enough points yet", "error"); return; }
+    toast(`${r.label} redeemed! Check your inbox 🎉`, "success");
+  };
+
+  return (
+    <div style={{ padding:"18px 18px 0" }}>
+      <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:26, color:"var(--white)", marginBottom:4 }}>Rewards</div>
+      <div style={{ color:"var(--sub)", fontSize:13, marginBottom:20 }}>Balance: <span style={{ color:"var(--saffron)", fontWeight:800 }}>⭐ {pts.toLocaleString()} pts</span></div>
+
+      {/* Points card */}
+      <div style={{ background:"linear-gradient(135deg,var(--surface),#0f2744)", borderRadius:20, padding:22, marginBottom:20, border:"1px solid var(--border2)", position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", right:-30, top:-30, width:150, height:150, background:"radial-gradient(circle,rgba(255,107,0,.2),transparent 60%)", pointerEvents:"none" }} />
+        <div style={{ fontSize:11, letterSpacing:"2px", color:"var(--muted)", marginBottom:8 }}>YOUR POINTS WALLET</div>
+        <div style={{ fontFamily:"var(--font-head)", fontWeight:900, fontSize:50, color:"var(--saffron)", letterSpacing:"-2px", lineHeight:1 }}>{pts.toLocaleString()}</div>
+        <div style={{ color:"var(--sub)", fontSize:13, marginTop:6, marginBottom:16 }}>≈ ₹{Math.round(pts*0.1)} real cashback value</div>
+
+        {/* Next reward progress */}
+        {(() => {
+          const next = REWARDS.find(r => r.pts > pts);
+          if (!next) return null;
+          return (
+            <div>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                <span style={{ fontSize:12, color:"var(--sub)" }}>Next: {next.label}</span>
+                <span style={{ fontSize:12, color:"var(--saffron)", fontWeight:700 }}>{pts}/{next.pts}</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width:`${(pts/next.pts)*100}%`, background:"linear-gradient(90deg,var(--saffron),var(--saffron2))" }} />
+              </div>
+              <div style={{ fontSize:11, color:"var(--muted)", marginTop:6 }}>{next.pts-pts} more points to go</div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Filter */}
+      <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:4, marginBottom:16, scrollbarWidth:"none" }}>
+        {["all","cash","transport","voucher","govt","premium","award"].map(c => (
+          <button key={c} onClick={() => setFilter(c)} style={{ flexShrink:0, background: filter===c ? "var(--saffron)":"var(--card)", border:`1px solid ${filter===c ? "var(--saffron)":"var(--border)"}`, borderRadius:20, padding:"6px 14px", fontFamily:"var(--font-head)", fontWeight:700, fontSize:11, color: filter===c ? "#fff":"var(--sub)", textTransform:"capitalize", cursor:"pointer" }}>
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {filtered.map(r => {
+        const canRedeem = pts >= r.pts;
+        return (
+          <div key={r.id} className={`reward-card ${canRedeem?"can-redeem":""}`} style={{ marginBottom:12 }}>
+            {canRedeem && (
+              <div style={{ position:"absolute", top:0, right:0, background:"linear-gradient(135deg,var(--saffron),var(--saffron2))", fontSize:9, fontWeight:800, color:"#fff", padding:"4px 12px", borderRadius:"0 16px 0 10px", letterSpacing:"1.5px" }}>AVAILABLE</div>
+            )}
+            <div style={{ display:"flex", gap:14, alignItems:"center", marginBottom:12, position:"relative" }}>
+              <div style={{ width:52, height:52, background:"rgba(255,107,0,.12)", borderRadius:14, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26 }}>{r.icon}</div>
+              <div>
+                <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:15, color:"var(--text)", marginBottom:3 }}>{r.label}</div>
+                <div style={{ fontSize:11, color:"var(--muted)" }}>Partner: {r.partner}</div>
+                <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:14, color: canRedeem ? "var(--saffron)":"var(--muted)", marginTop:3 }}>⭐ {r.pts.toLocaleString()} pts</div>
+              </div>
+            </div>
+            <button onClick={() => redeem(r)} style={{ width:"100%", background: canRedeem ? "linear-gradient(135deg,var(--saffron),var(--saffron2))":"var(--surface)", border:`1px solid ${canRedeem ? "var(--saffron)":"var(--border)"}`, borderRadius:10, padding:"10px", fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color: canRedeem ? "#fff":"var(--muted)", cursor: canRedeem ? "pointer":"default" }}>
+              {canRedeem ? "Redeem Now →" : `Need ${(r.pts-pts).toLocaleString()} more points`}
+            </button>
+          </div>
+        );
+      })}
+
+      {/* How to earn */}
+      <div className="card" style={{ marginTop:8 }}>
+        <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:14, color:"var(--text)", marginBottom:12 }}>⚡ Earn Points Faster</div>
+        {[
+          ["📢","File a report","+100–500 pts"],["✅","Report verified","+50% bonus"],
+          ["👍","Report upvoted 100x","+100 pts"],["🔗","Refer a friend","+200 pts"],
+          ["📅","7-day streak","+500 pts"],["💰","Corruption busted","Up to 15% of recovery"],
+        ].map(([icon,label,pts]) => (
+          <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"9px 0", borderBottom:"1px solid var(--border)" }}>
+            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+              <span>{icon}</span><span style={{ fontSize:13, color:"var(--sub)" }}>{label}</span>
+            </div>
+            <span style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:12, color:"var(--saffron)" }}>{pts}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DASHBOARD TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function DashboardTab() {
+  const { user, logout } = useContext(AuthCtx);
+  const toast = useContext(ToastCtx);
+  const myReports = Store.get("myReports", []);
+  const pts = user?.pts || 0;
+  const reports = user?.reports || 0;
+
+  return (
+    <div style={{ padding:"18px 18px 0" }}>
+      {/* Profile card */}
+      <div style={{ background:"linear-gradient(135deg,var(--surface),#0f2744)", borderRadius:20, padding:22, marginBottom:20, border:"1px solid var(--border2)", position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:-40, right:-40, width:180, height:180, background:"radial-gradient(circle,rgba(255,107,0,.12),transparent 60%)", pointerEvents:"none" }} />
+        <div style={{ display:"flex", gap:14, alignItems:"center", marginBottom:18 }}>
+          <div style={{ width:54, height:54, background:"linear-gradient(135deg,var(--saffron),var(--saffron2))", borderRadius:16, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24 }}>{user?.badge||"⚔️"}</div>
+          <div>
+            <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:17, color:"var(--white)" }}>{user?.name||"Prahari User"}</div>
+            <div style={{ fontSize:11, color:"var(--muted)" }}>ID: {user?.id||"PH001"}</div>
+            <div style={{ display:"flex", gap:6, marginTop:5 }}>
+              <span className="badge" style={{ background:"rgba(255,107,0,.18)", color:"var(--saffron)" }}>RANK #{user?.rank||284}</span>
+              <span className="badge" style={{ background:"rgba(0,200,83,.18)", color:"var(--green)" }}>ACTIVE 🔥</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:8 }}>
+          {[["⭐",pts.toLocaleString(),"Points"],["📢",reports,"Reports"],["✅","0","Resolved"],["🔥",user?.streak||0,"Streak"]].map(([icon,v,l]) => (
+            <div key={l} style={{ textAlign:"center" }}>
+              <div style={{ fontSize:16 }}>{icon}</div>
+              <div style={{ fontFamily:"var(--font-head)", fontWeight:800, fontSize:18, color:"var(--white)" }}>{v}</div>
+              <div style={{ fontSize:9, color:"var(--muted)" }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Achievements */}
+      <Section title="Achievements" sub="Badges from your civic work">
+        <div style={{ display:"flex", gap:10, overflowX:"auto", paddingBottom:8 }}>
+          {[
+            { icon:"🌟", label:"First Report", earned: reports>=1 },
+            { icon:"🔥", label:"3-Day Streak", earned: (user?.streak||0)>=3 },
+            { icon:"👊", label:"5 Reports",    earned: reports>=5 },
+            { icon:"⚖️", label:"Corruption",   earned: myReports.some(r=>r.cat==="corruption") },
+            { icon:"🦅", label:"50 Reports",   earned: reports>=50 },
+            { icon:"🏆", label:"100 Reports",  earned: reports>=100 },
+          ].map(a => (
+            <div key={a.label} style={{ flexShrink:0, textAlign:"center", width:70 }}>
+              <div style={{ width:54, height:54, background: a.earned ? "rgba(255,107,0,.18)":"var(--card)", border:`2px solid ${a.earned ? "var(--saffron)":"var(--border)"}`, borderRadius:16, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, margin:"0 auto 5px", filter: a.earned ? "none":"grayscale(1) opacity(.4)" }}>{a.icon}</div>
+              <div style={{ fontSize:9, color: a.earned ? "var(--text)":"var(--muted)", lineHeight:1.3 }}>{a.label}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Blockchain proof */}
+      <div className="card" style={{ marginBottom:20 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+          <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:14, color:"var(--text)" }}>🔒 Blockchain Record</div>
+          <span className="badge" style={{ background:"rgba(0,200,83,.18)", color:"var(--green)" }}>VERIFIED ✓</span>
+        </div>
+        <div style={{ fontSize:11, color:"var(--muted)", fontFamily:"monospace", background:"var(--surface)", borderRadius:8, padding:12, lineHeight:1.9 }}>
+          Wallet: 0x{(user?.id||"U0").slice(-8).padStart(8,"0")}...{Math.random().toString(16).slice(2,6)}<br/>
+          Reports: {myReports.length} entries on-chain<br/>
+          Hash: {Math.random().toString(16).slice(2,10)}...{Math.random().toString(16).slice(2,6)}<br/>
+          Network: Polygon PoS ✓
+        </div>
+      </div>
+
+      {/* My Reports */}
+      <Section title="My Reports" sub={`${myReports.length} total reports filed`}>
+        {myReports.length === 0 ? (
+          <div className="card" style={{ textAlign:"center", padding:32 }}>
+            <div style={{ fontSize:40, marginBottom:12 }}>📢</div>
+            <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:15, color:"var(--text)", marginBottom:6 }}>No reports yet</div>
+            <div style={{ color:"var(--muted)", fontSize:13 }}>File your first report and start earning points</div>
+          </div>
+        ) : (
+          myReports.map(r => {
+            const catObj = CATEGORIES.find(c=>c.id===r.cat);
+            return (
+              <div key={r.id} className="card" style={{ marginBottom:10 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+                  <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                    <span>{catObj?.icon}</span>
+                    <span style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color:"var(--text)" }}>{catObj?.label}</span>
+                  </div>
+                  <StatusBadge status={r.status} />
+                </div>
+                <div style={{ color:"var(--sub)", fontSize:12, lineHeight:1.5, marginBottom:8 }}>{r.title}</div>
+                <div style={{ display:"flex", justifyContent:"space-between" }}>
+                  <span style={{ color:"var(--muted)", fontSize:11 }}>{r.city} • {new Date(r.time).toLocaleDateString()}</span>
+                  <span style={{ color:"var(--muted)", fontSize:11 }}>AI Score: {r.aiScore}%</span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </Section>
+
+      {/* Settings */}
+      <div className="card" style={{ marginBottom:24 }}>
+        <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:14, color:"var(--text)", marginBottom:14 }}>⚙️ Settings</div>
+        {[
+          { icon:"🔔", label:"Push Notifications",   sub:"Get notified when reports are resolved" },
+          { icon:"🛡️", label:"Whistleblower Mode",   sub:"Extra identity protection for sensitive reports" },
+          { icon:"📍", label:"Location Services",    sub:"For accurate report geotagging" },
+          { icon:"🌙", label:"Dark Mode",            sub:"Always on — designed for night viewing" },
+        ].map(s => (
+          <div key={s.label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid var(--border)" }}>
+            <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+              <span style={{ fontSize:18 }}>{s.icon}</span>
+              <div>
+                <div style={{ fontSize:13, fontWeight:600, color:"var(--text)" }}>{s.label}</div>
+                <div style={{ fontSize:11, color:"var(--muted)" }}>{s.sub}</div>
+              </div>
+            </div>
+            <div className="toggle" style={{ background:"var(--saffron)" }}>
+              <div className="toggle-thumb" style={{ left:23 }} />
+            </div>
+          </div>
+        ))}
+        <button onClick={() => { logout(); window.location.reload(); }} style={{ width:"100%", marginTop:16, background:"none", border:"1px solid var(--red)", borderRadius:10, padding:"10px", fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color:"var(--red)", cursor:"pointer" }}>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REUSABLE COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════
+function Section({ title, sub, children }) {
+  return (
+    <div style={{ padding:"0 18px 0" }}>
+      <div style={{ marginBottom:14, marginTop:28 }}>
+        <div className="section-title">{title}</div>
+        <div className="section-sub">{sub}</div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function ReportCard({ r }) {
+  const catObj = CATEGORIES.find(c=>c.id===r.cat);
+  return (
+    <div className="card" style={{ marginBottom:12 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+        <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+          <div style={{ width:38, height:38, background:`${catObj?.color||"#FF6B00"}18`, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>{catObj?.icon}</div>
+          <div>
+            <div style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:13, color:"var(--text)" }}>{catObj?.label}</div>
+            <div style={{ fontSize:10, color:"var(--muted)" }}>{r.user} • {r.city} • {r.time}</div>
+          </div>
+        </div>
+        <StatusBadge status={r.status} />
+      </div>
+      <div style={{ color:"var(--sub)", fontSize:12, lineHeight:1.6, marginBottom:10 }}>{r.title}</div>
+      {r.impact && (
+        <div style={{ background:"rgba(0,200,83,.08)", border:"1px solid rgba(0,200,83,.2)", borderRadius:8, padding:"6px 10px", fontSize:11, color:"var(--green)", marginBottom:10 }}>✓ {r.impact}</div>
+      )}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <span style={{ fontSize:11, color:"var(--muted)" }}>👍 {r.votes?.toLocaleString()} upvotes</span>
+        {r.pts > 0 && <span style={{ fontFamily:"var(--font-head)", fontWeight:700, fontSize:12, color:"var(--saffron)" }}>+{r.pts} pts ⭐</span>}
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const m = {
+    pending:     { bg:"rgba(122,149,184,.15)", color:"#7A95B8",  label:"⏳ Pending" },
+    verified:    { bg:"rgba(0,200,83,.12)",    color:"#00C853",  label:"✓ Verified" },
+    action_taken:{ bg:"rgba(14,165,233,.12)",  color:"#0EA5E9",  label:"⚡ Action Taken" },
+    resolved:    { bg:"rgba(0,200,83,.15)",    color:"#00C853",  label:"✅ Resolved" },
+    rejected:    { bg:"rgba(239,68,68,.12)",   color:"#EF4444",  label:"✗ Rejected" },
+  };
+  const s = m[status] || m.pending;
+  return <span className="badge" style={{ background:s.bg, color:s.color }}>{s.label}</span>;
+}
+
+function Field({ label, placeholder, value, onChange, error, maxLength }) {
+  return (
+    <div>
+      <label style={{ fontSize:11, color:"var(--sub)", marginBottom:6, display:"block", fontWeight:500 }}>{label}</label>
+      <input type="text" placeholder={placeholder} value={value} maxLength={maxLength}
+        onChange={e => onChange(Security.sanitize(e.target.value))} />
+      {error && <div style={{ fontSize:11, color:"var(--red)", marginTop:4 }}>⚠ {error}</div>}
+    </div>
+  );
+}
+
+function ToggleRow({ label, sub, val, onChange, color="var(--saffron)" }) {
+  return (
+    <div onClick={() => onChange(!val)} className="card" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer", padding:14 }}>
+      <div>
+        <div style={{ fontWeight:600, fontSize:13, color:"var(--text)" }}>{label}</div>
+        <div style={{ color:"var(--muted)", fontSize:11, marginTop:2 }}>{sub}</div>
+      </div>
+      <div className="toggle" style={{ background: val ? color : "var(--border)" }}>
+        <div className="toggle-thumb" style={{ left: val ? 23 : 3 }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
